@@ -1,16 +1,18 @@
 <?php
-require "vendor/autoload.php";
-use \Firebase\JWT\JWT;
-
 header('Content-Type: application/json');
+require "vendor/autoload.php";
+require_once "jwt-helper.php";
 
-$response = array(
-  "code" => 401,
-  "message" => "Token not valid!",
-  "data" => null
-);
+// Buat objek jwt
+$jwt = new JwtHelper();
+$jwt->SetAlgoHash('HS256');
+$jwt->SetPrivateKey("j+_^%&G*@vbhJ!(()");
 
-
+$result = [
+  "error" => true,
+  "message" => null,
+  "data" => null,
+];
 
 /* PETUNJUK */
 /*
@@ -29,46 +31,10 @@ $response = array(
 $header = apache_request_headers();
 $token = $header["Authorization"];
 
+// KEDUA, PROSES PENGECEKAN KEBERADAAN TOKEN
+$data = $jwt->BacaToken($token);
 
-
-// KITA PAKAI TRY CATCH AGAR SAAT PROSES PEMBACAAN TOKEN
-// DAN TERNYATA ADA YANG SALAH DENGAN TOKEN
-// KITA CUKUP BERI RESPONSE 401 PADA CATCH UNTUK CLIENT
-
-try {
-  // KEDUA, KITA CEK DULU APAKAH TOKENNYA ADA ATAU TIDAK
-  if(!empty($token))
-  {
-    // KETIGA, PASTIKAN ISI TOKENNYA ADALAH "Bearer TOKEN_JWT"
-    $hasil_token = explode(" ", $token); // isi token dipisah berdasarkan spasi
-    
-    if(count($hasil_token) == 2) // hasil explode token harus 2
-    {
-      if($hasil_token[0] == "Bearer") // isi token pertama adalah tulisan "Bearer"
-      {
-        // proses pembacaan token
-        //~ // PRIVATE KEY, SAMA SEPERTI YANG KITA PAKAI SEBELUMNYA SAAT MEMBUAT TOKEN
-        $key = "j+_^%&G*@vbhJ!(()";
-        
-        //~ // PROSES VALIDASI TOKEN
-        $data = JWT::decode($hasil_token[1], $key, array('HS256'));
-        
-        //~ /* OUTPUT */
-        //~ echo $data->username;
-        //~ echo $data->tgl_login;
-        
-        // KITA KEMBALIKAN ISI TOKEN KE USER DALAM BENTUK JSON
-        $response["code"] = 200;
-        $response["message"] = "Ok";
-        $response["data"] = $data; // data berisi username dan tgl_login dari token yg telah di buat di buat_token.php
-      }
-    }
-  }
-  echo json_encode($response);
-}
-catch(Exception $e) {
-  $response["error"] = $e->getMessage();
-  echo json_encode($response);
-}
+// KETIGA, HASIL PEMBACAAN DIOPER KE KLIEN
+echo json_encode($data);
 
 ?>
