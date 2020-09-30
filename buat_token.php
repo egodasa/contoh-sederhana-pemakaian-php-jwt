@@ -11,7 +11,8 @@ $jwt->SetPrivateKey("j+_^%&G*@vbhJ!(()");
 $response = array(
   "code" => 401,
   "message" => "Not Allowed!",
-  "data" => null
+  "data" => null,
+  "status" => false
 );
 
 if($_SERVER['REQUEST_METHOD'] == "POST")
@@ -23,6 +24,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST")
     $response["code"] = 200;
     $response["message"] = "Ok";
     $response["data"] = $token;
+    $response["status"] = true;
   }
 }
 echo json_encode($response);
